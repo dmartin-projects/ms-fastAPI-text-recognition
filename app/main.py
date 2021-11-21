@@ -14,3 +14,8 @@ app = FastAPI()
 def home_view(request:Request):
     return templates.TemplateResponse('home_view/home.html', {"request":request, "name":"david"})
 
+
+@app.post('/')
+def home_detail_view():
+    return {"hello":"world"}
+

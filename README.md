@@ -148,3 +148,37 @@ home.html, when it extends from base.html remember that start to look out from d
 </div>
 {% endblock%}
 ```
+
+## Dependencies - III
+
+We gonna implement tester using `pytest` and `requests`
+
+```
+pip install pytest requests
+```
+
+to order to run all our test with pytest we must place a `pytest.ini` file at root directory with this content:
+
+```
+[pytest]
+norecursedirs = lib/* bin/* include/*
+```
+
+then we must writte a test, remenber all function must start with `test_`
+
+test_endpoints.py
+
+```python
+from fastapi.testclient import TestClient
+from app.main import app
+
+client = TestClient(app)
+
+def test_get_home_view():
+    response = client.get('/')
+    assert response.status_code == 200
+    assert 'text/html' in response.headers['content-type']
+
+```
+
+![not found](img/1.png)
