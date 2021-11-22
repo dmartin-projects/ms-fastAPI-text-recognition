@@ -182,3 +182,135 @@ def test_get_home_view():
 ```
 
 ![not found](img/1.png)
+
+## Deploy to heroku using docker
+
+As we are gonna use `tesseract-ocr` which is a software running on a Operating System so we need docker which create a image of OS where we could install whatever we nedd.
+
+In order to get that we need create three files on our root directory
+
+1. Dockerfile
+
+```dockerfile
+FROM python:3.8-slim
+
+COPY ./app /app
+COPY ./entrypoint.sh /entrypoint.sh
+COPY ./requirements.txt /requirements.txt
+
+RUN apt-get update && \
+    apt-get install -y \
+        build-essential \
+        python3-dev \
+        python3-setuptools \
+        tesseract-ocr \
+        make \
+        gcc \
+    && python3 -m pip install -r requirements.txt \
+    && apt-get remove -y --purge make gcc build-essential \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN chmod +x entrypoint.sh
+
+CMD [ "./entrypoint.sh" ]
+```
+
+2. docker-compose.yml
+
+```yml
+version: "3.9"
+services:
+  web:
+    build: .
+    volumes:
+      - ./app:/app
+```
+
+3. entrypoint.sh
+
+```bash
+#!/bin/bash
+
+RUN_PORT=${PORT:-8000}
+
+/usr/local/bin/gunicorn --worker-tmp-dir /dev/shm -k uvicorn.workers.UvicornWorker app.main:app --bind "0.0.0.0:${RUN_PORT}"
+```
+
+Once all this is done we can deploy it to heroku
+
+1. we must create an app in heroku for instance myAppDocker
+2. in our machine
+
+```
+heroku login
+heroku container:login
+```
+
+deploy app
+
+```
+heroku container:push web --app myAppDocker
+```
+
+release our container
+
+```
+heroku container:release web --app myAppDocker
+```
+
+I can log into docker images placed in heroku
+
+```
+heroku run bash --app myAppDocker
+```
+
+## Two invirorment
+
+From here we have two environment, develop and production.
+
+So we need some way to distinguish both from each other. To do that we will create a `.env` file on the root directory where we place a `DEBUG=1`
+
+In order to do that we will need:
+
+1. `from pydantic import BaseSettings`
+2. `from functools import lru_cache`
+3. `from fastapi import Depends`
+
+lru_cache is a decorator and tto work have to be installed `python-dotenv` bassically we make a class extended from `BaseSettings` and inside that we create a `class Config` which read de `.env` file
+
+```python
+from fastapi import FastAPI, Request, Depends
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+import pathlib,os
+
+
+from pydantic import BaseSettings
+
+from functools import lru_cache
+
+class Settings(BaseSettings):
+    debug:bool= False
+    class Config:
+        env_file = 'app/.env'
+
+# according to official doc this is the most efficient way to initialize these settings
+# with this decorator we make sure this is gonna call one time
+@lru_cache
+def get_settings():
+    return Settings()
+
+# talling fastAPI where to find out a templtes
+
+BASE_DIR = os.path.dirname(__file__)
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR,'templates'))
+
+app = FastAPI()
+
+@app.get('/', response_class=HTMLResponse)
+def home_view(request: Request, settings:Settings = Depends(get_settings)):
+    return templates.TemplateResponse('home_view/home.html', {"request":request, "name":"david"})
+
+
+```
