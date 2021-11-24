@@ -1,4 +1,3 @@
-from os import path
 import pathlib
 import pytesseract
 

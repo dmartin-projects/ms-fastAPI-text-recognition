@@ -166,6 +166,12 @@ norecursedirs = lib/* bin/* include/*
 
 then we must writte a test, remenber all function must start with `test_`
 
+Para correr los text
+
+```
+pytest -s
+```
+
 test_endpoints.py
 
 ```python

@@ -4,18 +4,27 @@ from fastapi import (
     Depends,
     File,
     UploadFile,
-    HTTPException
+    HTTPException,
+    Form
 
     )
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 import pathlib,os,uuid,io
 from PIL import Image
-
-
 from pydantic import BaseSettings
-
 from functools import lru_cache
+
+import pytesseract
+
+from fastapi.staticfiles import StaticFiles
+
+
+
+
+
+
+
 
 class Settings(BaseSettings):
     debug:bool= False
@@ -33,21 +42,35 @@ def get_settings():
 # telling fastAPI where to find out our important directories 
 BASE_DIR = pathlib.Path(__file__).parent
 UPLOAD_DIR = BASE_DIR/'uploads'
+STATIC_DIR = BASE_DIR/'static'
 
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR,'templates'))
 
 app = FastAPI()
+app.mount('/static', StaticFiles(directory="static"), name="static")
+
 
 @app.get('/', response_class=HTMLResponse)
 def home_view(request: Request, settings:Settings = Depends(get_settings)):
     print(settings.name)
     print(settings.debug)
-    return templates.TemplateResponse('home_view/home.html', {"request":request, "name":"david"})
+    return templates.TemplateResponse('index.html', {"request":request})
 
 
 @app.post('/')
-def home_detail_view():
-    return {"hello":"world"}
+async def prediction_view(file:UploadFile=File(...),settings:Settings = Depends(get_settings)):
+
+    bytes_str = io.BytesIO(file.file.read())
+
+    try:
+        img = Image.open(bytes_str) # converting bytes into a img if it could be all ok
+    except:
+        raise HTTPException(detail="invalid img", status_code=400)
+
+    prediction_origin = pytesseract.image_to_string(img)
+    prediction = [line for line in prediction_origin.split('\n') if line not in ['','\t','\f']]
+
+    return {"results":prediction, "original_string":prediction_origin}
 
 @app.post('/img-echo/', response_class=FileResponse)
 async def img_echo_view(file:UploadFile=File(...),settings:Settings = Depends(get_settings)):
@@ -69,4 +92,5 @@ async def img_echo_view(file:UploadFile=File(...),settings:Settings = Depends(ge
     dest = UPLOAD_DIR/f'{uuid.uuid1()}{file_extention}'
     img.save(dest)
     return dest
+
 
