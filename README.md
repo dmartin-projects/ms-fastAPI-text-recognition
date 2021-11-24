@@ -329,7 +329,9 @@ from fastapi import (
     )
 ```
 
-and to test it we will need `aiofiles`, `python-multipart` and `pillow`
+and to test it we will need:
+
+` pip install aiofiles python-multipart pillow`
 
 ```python
 
@@ -402,3 +404,25 @@ sudo apt install libtesseract-dev
 and we need `pip install pytesseract`
 
 Tesseract is a LSTM (long-short time memory) neural network so as a model of machine learning it makes predictions. To improve that predictions it must be trained.
+
+To start using tesseract is pretty simple. We will create a new file `ocr.py`
+
+```python
+from os import path
+import pathlib
+import pytesseract
+
+from PIL import Image
+
+BASE_DIR = pathlib.Path(__file__).parent
+IMG_DIR = BASE_DIR/'img'
+
+img_path = IMG_DIR/'ingredients-1.png'
+
+
+img = Image.open(img_path)
+
+prediction = pytesseract.image_to_string(img)
+prediction = [line for line in prediction.split('\n') if line not in ['','\t','\f']]
+print(prediction)
+```

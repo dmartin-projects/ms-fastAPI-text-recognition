@@ -25,16 +25,14 @@ class Settings(BaseSettings):
         env_file = 'app/.env'
 
 # according to official doc this is the most efficient way to initialize these settings
-# with this decorator we make sure this is gonna call one time 
+# with this decorator we make sure this is gonna call onece 
 @lru_cache
 def get_settings():
     return Settings()
 
-# talling fastAPI where to find out a templtes
-
+# telling fastAPI where to find out our important directories 
 BASE_DIR = pathlib.Path(__file__).parent
 UPLOAD_DIR = BASE_DIR/'uploads'
-UPLOAD_DIR.mkdir(exist_ok=True)
 
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR,'templates'))
 
@@ -59,7 +57,7 @@ async def img_echo_view(file:UploadFile=File(...),settings:Settings = Depends(ge
 
     UPLOAD_DIR.mkdir(exist_ok=True)
 
-    bytes_str = io.BytesIO(await file.read())
+    bytes_str = io.BytesIO(file.file.read())
 
     try:
         img = Image.open(bytes_str) # converting bytes into a img if it could be all ok
