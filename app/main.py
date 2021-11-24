@@ -1,7 +1,16 @@
-from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse
+from fastapi import (
+    FastAPI,
+    Request, 
+    Depends,
+    File,
+    UploadFile,
+    HTTPException
+
+    )
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
-import pathlib,os
+import pathlib,os,uuid,io
+from PIL import Image
 
 
 from pydantic import BaseSettings
@@ -11,6 +20,7 @@ from functools import lru_cache
 class Settings(BaseSettings):
     debug:bool= False
     name:str
+    echo_active: bool = False
     class Config:
         env_file = 'app/.env'
 
@@ -22,7 +32,10 @@ def get_settings():
 
 # talling fastAPI where to find out a templtes
 
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = pathlib.Path(__file__).parent
+UPLOAD_DIR = BASE_DIR/'uploads'
+UPLOAD_DIR.mkdir(exist_ok=True)
+
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR,'templates'))
 
 app = FastAPI()
@@ -37,4 +50,25 @@ def home_view(request: Request, settings:Settings = Depends(get_settings)):
 @app.post('/')
 def home_detail_view():
     return {"hello":"world"}
+
+@app.post('/img-echo/', response_class=FileResponse)
+async def img_echo_view(file:UploadFile=File(...),settings:Settings = Depends(get_settings)):
+
+    if not settings.echo_active:
+        raise HTTPException(detail="invalid endpoint", status_code=400)
+
+    UPLOAD_DIR.mkdir(exist_ok=True)
+
+    bytes_str = io.BytesIO(await file.read())
+
+    try:
+        img = Image.open(bytes_str) # converting bytes into a img if it could be all ok
+    except:
+        raise HTTPException(detail="invalid img", status_code=400)
+
+    f_name = pathlib.Path(file.filename)
+    file_extention = f_name.suffix
+    dest = UPLOAD_DIR/f'{uuid.uuid1()}{file_extention}'
+    img.save(dest)
+    return dest
 

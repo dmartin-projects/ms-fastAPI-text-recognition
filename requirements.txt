@@ -1,3 +1,4 @@
+aiofiles==0.7.0
 anyio==3.3.4
 asgiref==3.4.1
 attrs==21.2.0
@@ -12,13 +13,17 @@ iniconfig==1.1.1
 Jinja2==3.0.3
 MarkupSafe==2.0.1
 packaging==21.3
+Pillow==8.4.0
 pluggy==1.0.0
 py==1.11.0
 pydantic==1.8.2
 pyparsing==3.0.6
+pytesseract==0.3.8
 pytest==6.2.5
 python-dotenv==0.19.2
+python-multipart==0.0.5
 requests==2.26.0
+six==1.16.0
 sniffio==1.2.0
 starlette==0.16.0
 toml==0.10.2

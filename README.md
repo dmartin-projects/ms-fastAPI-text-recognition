@@ -265,7 +265,7 @@ I can log into docker images placed in heroku
 heroku run bash --app myAppDocker
 ```
 
-## Two invirorment
+## Two envirorment
 
 From here we have two environment, develop and production.
 
@@ -310,7 +310,95 @@ app = FastAPI()
 
 @app.get('/', response_class=HTMLResponse)
 def home_view(request: Request, settings:Settings = Depends(get_settings)):
+
     return templates.TemplateResponse('home_view/home.html', {"request":request, "name":"david"})
 
 
 ```
+
+## Upload files
+
+To upload files we need to install `pip install python-multipart` and import some dependencies as File UploadFile
+
+```python
+from fastapi import (
+    Depends,
+    File,
+    UploadFile,
+    HTTPException
+    )
+```
+
+and to test it we will need `aiofiles`, `python-multipart` and `pillow`
+
+```python
+
+@app.post('/img-echo/', response_class=FileResponse)
+async def img_echo_view(file:UploadFile=File(...),settings:Settings = Depends(get_settings)):
+
+    if not settings.echo_active:
+        raise HTTPException(detail="invalid endpoint", status_code=400)
+
+    UPLOAD_DIR.mkdir(exist_ok=True)
+
+    bytes_str = io.BytesIO(await file.read())
+
+    try:
+        img = Image.open(bytes_str) # converting bytes into a img if it could be all ok
+    except:
+        raise HTTPException(detail="invalid img", status_code=400)
+
+    f_name = pathlib.Path(file.filename)
+    file_extention = f_name.suffix
+    dest = UPLOAD_DIR/f'{uuid.uuid1()}{file_extention}'
+    img.save(dest)
+    return dest
+```
+
+we return de path to de file uploaded.
+
+If we wanna write a test for local environment:
+
+```python
+import os,time, shutil
+
+def test_post_img_echo_view():
+    img_saved_path = BASE_DIR/'img'
+
+    for path in img_saved_path.glob('*'):
+
+        try:
+            img = Image.open(path)
+        except:
+            img = None
+
+        response = client.post('/img-echo/',files={"file":open(path,'rb')})
+
+        if img is None:
+            assert response.status_code == 400
+        else:
+            assert response.status_code == 200
+            r_stream = io.BytesIO(response.content)
+            echo_img = Image.open(r_stream)
+            # we are gonna compare both images original and uploaded, for that we need ImageChops
+            difference = ImageChops.difference(echo_img,img).getbbox()
+            assert difference is None # so is the same image
+
+
+    shutil.rmtree(UPLOAD_DIR)
+```
+
+we dont wanna save in memory all the images uploaded so with the command `shutil.rmtree(UPLOAD_DIR)` allow us to delete it.
+
+## Imlementing tesseract and pytesseract
+
+Firt at all we will install tesserect on our local machite to test it.
+
+```
+sudo apt install tesseract-ocr
+sudo apt install libtesseract-dev
+```
+
+and we need `pip install pytesseract`
+
+Tesseract is a LSTM (long-short time memory) neural network so as a model of machine learning it makes predictions. To improve that predictions it must be trained.
