@@ -268,7 +268,7 @@ heroku container:release web --app myAppDocker
 finally open app in our browser
 
 ```
-heroku open
+heroku open --app myAppDocker
 ```
 
 I can log into docker images placed in heroku
