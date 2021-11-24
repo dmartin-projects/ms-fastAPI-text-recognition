@@ -8,6 +8,7 @@ from fastapi import (
     Form
 
     )
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 import pathlib,os,uuid,io
@@ -44,6 +45,18 @@ app = FastAPI()
 app.mount('/static', StaticFiles(directory=STATIC_DIR), name="static")
 
 
+origins = ['*']
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins= origins,
+    allow_credentials= True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
 @app.get('/', response_class=HTMLResponse)
 def home_view(request: Request, settings:Settings = Depends(get_settings)):
     print(settings.name)
@@ -63,7 +76,7 @@ async def prediction_view(file:UploadFile=File(...),settings:Settings = Depends(
 
     prediction_origin = pytesseract.image_to_string(img)
     prediction = [line for line in prediction_origin.split('\n') if line not in ['','\t','\f']]
-
+    
     return {"results":prediction, "original_string":prediction_origin}
 
 @app.post('/img-echo/', response_class=FileResponse)

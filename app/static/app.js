@@ -5,7 +5,6 @@ const dropArea = document.querySelector(".drag-area"),
   button_extract = document.querySelectorAll(".send"),
   input = dropArea.querySelector("input");
 let file; //this is a global variable and we'll use it inside multiple functions
-console.log(button_extract);
 
 button.onclick = () => {
   input.click(); //if user click on the button then the input also clicked
@@ -81,7 +80,7 @@ button_extract[0].addEventListener("click", (e) => {
   formData.append("file", file, file.name);
 
   // fileReader.onload = () => {
-  postData("http://localhost:8000/", formData)
+  postData("https://ms-fastapi-read-text.herokuapp.com/", formData)
     .then((response) => console.log(response))
     .then((data) => {
       console.log(data);
