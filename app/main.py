@@ -20,12 +20,6 @@ import pytesseract
 from fastapi.staticfiles import StaticFiles
 
 
-
-
-
-
-
-
 class Settings(BaseSettings):
     debug:bool= False
     name:str
