@@ -79,6 +79,7 @@ async def prediction_view(file:UploadFile=File(...),settings:Settings = Depends(
     
     return {"results":prediction, "original_string":prediction_origin}
 
+
 @app.post('/img-echo/', response_class=FileResponse)
 async def img_echo_view(file:UploadFile=File(...),settings:Settings = Depends(get_settings)):
 
