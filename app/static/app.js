@@ -5,11 +5,11 @@ const dropArea = document.querySelector(".drag-area"),
   button_extract = document.querySelectorAll(".send"),
   input = dropArea.querySelector("input");
 let file; //this is a global variable and we'll use it inside multiple functions
-
+let myModal = new bootstrap.Modal(document.getElementById("myModal"), {});
 button.onclick = () => {
   input.click(); //if user click on the button then the input also clicked
 };
-
+let modalBody = document.querySelector("#responseText");
 input.addEventListener("change", function () {
   //getting user select file and [0] this means if user select multiple files then we'll select only the first one
   file = this.files[0];
@@ -71,24 +71,27 @@ function showFile() {
 button_extract[0].addEventListener("click", (e) => {
   e.preventDefault();
 
-  let fileReader = new FileReader(); //creating new FileReader object
-
-  // start reading our file
-  //   fileReader.readAsArrayBuffer(file);
-
   let formData = new FormData();
   formData.append("file", file, file.name);
 
-  // fileReader.onload = () => {
-  postData("https://ms-fastapi-read-text.herokuapp.com/", formData)
-    .then((response) => console.log(response))
+  postData("http://localhost:8000/", formData)
+    .then((response) => {
+      const div = document.createElement("div");
+      response.results.forEach((element) => {
+        const p = document.createElement("p");
+        p.innerText = element;
+        div.appendChild(p);
+      });
+
+      modalBody.appendChild(div);
+      myModal.show();
+    })
     .then((data) => {
       console.log(data);
     })
     .catch((error) => {
       console.error(error);
     });
-  // };
 });
 
 async function postData(url = "", data) {

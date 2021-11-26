@@ -11,15 +11,11 @@ body {
   justify-content: center;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #ff3cac;
-  background-image: linear-gradient(
-    225deg,
-    #ff3cac 0%,
-    #784ba0 50%,
-    #2b86c5 100%
-  );
-
-  background-attachment: fixed;
+  background: url(/static/back-ground.jpg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
 }
 .drag-area {
   border: 2px dashed #fff;
@@ -33,6 +29,7 @@ body {
 }
 .drag-area.active {
   border: 2px solid #fff;
+  padding: 1rem;
 }
 .drag-area .icon {
   font-size: 100px;

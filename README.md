@@ -44,7 +44,7 @@ uvicorn app.main:app --reload
 In fact we are not gonna build a REST-API since it not gonna response with a JSON but a HTML template made with `JINJA Templates`.
 So to install it
 
-`pip install jini2`
+`pip install jinja2`
 
 In this point we have to be aware that fastAPI has no idea about templates and HTML files because it is build to respond JSON data.
 
@@ -289,7 +289,7 @@ In order to do that we will need:
 2. `from functools import lru_cache`
 3. `from fastapi import Depends`
 
-lru_cache is a decorator and tto work have to be installed `python-dotenv` bassically we make a class extended from `BaseSettings` and inside that we create a `class Config` which read de `.env` file
+lru_cache is a decorator and needs install `python-dotenv` bassically we make a class extended from `BaseSettings` and inside it, we create a `class Config` which read the `.env` file ( we must specifie the path)
 
 ```python
 from fastapi import FastAPI, Request, Depends
@@ -438,3 +438,88 @@ prediction = pytesseract.image_to_string(img)
 prediction = [line for line in prediction.split('\n') if line not in ['','\t','\f']]
 print(prediction)
 ```
+
+## Static files
+
+using jinja2 we can link a static file:
+
+```html
+<link rel="stylesheet" href="{{ url_for('static', path='style.css') }}" />
+<script src="{{ url_for('static', path='app.js') }}" defer></script>
+```
+
+or in production we nedd use this syntax
+
+```html
+<script src="/static/app.js" defer></script>
+<link rel="stylesheet" href="/static/style.css" />
+```
+
+to be able to do that we must specifie in fastapi where is the static folder
+
+```python
+from fastapi.staticfiles import StaticFiles
+
+BASE_DIR = pathlib.Path(__file__).parent
+STATIC_DIR = BASE_DIR/'static'
+
+app.mount('/static', StaticFiles(directory=STATIC_DIR), name="static")
+
+```
+
+once in production we need allow external connections
+
+```python
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = ['*']
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins= origins,
+    allow_credentials= True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+```
+
+## sendings files from frontend to fastapi
+
+I will use fetch API to send files so we must send it as a formData. An example of the sender function could be like this:
+
+```javascript
+button_extract[0].addEventListener("click", (e) => {
+  e.preventDefault();
+
+  let formData = new FormData();
+  formData.append("file", file, file.name);
+
+  postData("https://ms-fastapi-read-text.herokuapp.com/", formData)
+    .then((response) => console.log(response))
+    .then((data) => {
+      console.log(data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+});
+
+async function postData(url = "", data) {
+  const response = await fetch(url, {
+    method: "POST",
+    body: data,
+  });
+  return response.json(); // parses JSON response into native JavaScript objects
+}
+```
+
+**very important thing is when we append data to formData `formData.append("myFile", file);` we must send it with the same name of the argument of our function**
+
+```python
+
+@app.post('/')
+async def prediction_view(myFile:UploadFile=File(...),settings:Settings = Depends(get_settings)):
+```
+
+if not fastapi will not able to catch it.
