@@ -74,7 +74,7 @@ button_extract[0].addEventListener("click", (e) => {
   let formData = new FormData();
   formData.append("file", file, file.name);
 
-  postData("http://localhost:8000/", formData)
+  postData("https://ms-fastapi-read-text.herokuapp.com/", formData)
     .then((response) => {
       const div = document.createElement("div");
       response.results.forEach((element) => {
