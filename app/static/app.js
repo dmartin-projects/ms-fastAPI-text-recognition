@@ -20,7 +20,7 @@ const div = document.createElement("div");
 let img = document.createElement("img");
 
 let url, DEBUG;
-DEBUG = true;
+DEBUG = false;
 
 DEBUG = "https://ms-fastapi-read-text.herokuapp.com/";
 
@@ -98,7 +98,7 @@ button_extract.addEventListener("click", (e) => {
   let formData = new FormData();
   formData.append("file", file, file.name);
 
-  postData(url, formData)
+  postDataImg(url, formData)
     .then((response) => {
       div.innerHTML = "";
       response.results.forEach((element) => {
@@ -118,7 +118,15 @@ button_extract.addEventListener("click", (e) => {
     });
 });
 
-async function postData(url = "", data) {
+async function postDataImg(url = "", data) {
+  const response = await fetch(url, {
+    method: "POST",
+    body: data,
+  });
+  //console.log(response.text());
+  return response.json(); // parses JSON response into native JavaScript objects
+}
+async function postDataText(url = "", data) {
   const response = await fetch(url, {
     method: "POST",
     body: data,
@@ -143,7 +151,7 @@ button_createTXT.addEventListener("click", (e) => {
   let formData = new FormData();
   formData.append("file", file, file.name);
 
-  postData(url + "create-text/", formData)
+  postDataText(url + "create-text/", formData)
     .then((response) => {
       function download(filename, text) {
         var pom = document.createElement("a");
