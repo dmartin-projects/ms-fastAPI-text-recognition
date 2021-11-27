@@ -154,16 +154,6 @@ button_createTXT.addEventListener("click", (e) => {
 
   postDataText(url + "create-text/", formData)
     .then((response) => {
-      function download(filename, text) {
-        var pom = document.createElement("a");
-        pom.setAttribute(
-          "href",
-          "data:text/plain;charset=utf-8," + encodeURIComponent(text)
-        );
-        pom.setAttribute("download", filename);
-        pom.click();
-      }
-
       download("text.txt", response);
     })
     .then((data) => {
@@ -173,3 +163,13 @@ button_createTXT.addEventListener("click", (e) => {
       console.error(error);
     });
 });
+
+function download(filename, text) {
+  var pom = document.createElement("a");
+  pom.setAttribute(
+    "href",
+    "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+  );
+  pom.setAttribute("download", filename);
+  pom.click();
+}
