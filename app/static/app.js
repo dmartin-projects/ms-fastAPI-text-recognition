@@ -20,9 +20,10 @@ const div = document.createElement("div");
 let img = document.createElement("img");
 
 let url, DEBUG;
+
 DEBUG = false;
 
-DEBUG = "https://ms-fastapi-read-text.herokuapp.com/";
+url = "https://ms-fastapi-read-text.herokuapp.com/";
 
 if (DEBUG) {
   url = "http://127.0.0.1:8000/";
