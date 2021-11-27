@@ -536,7 +536,7 @@ button_extract[0].addEventListener("click", (e) => {
   e.preventDefault();
 
   let formData = new FormData();
-  formData.append("file", file, file.name);
+  formData.append("myFile", file, file.name);
 
   postData("https://ms-fastapi-read-text.herokuapp.com/", formData)
     .then((response) => console.log(response))
