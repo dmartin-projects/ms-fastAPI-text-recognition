@@ -22,21 +22,27 @@
     <div class="row">
       <div class="col d-flex justify-content-center">
         <div class="drag-area">
-          <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
-          <header class="text-justify">Drag & Drop to Upload File</header>
-          <span>OR</span>
-          <button>Browse File</button>
-          <input type="file" hidden>
+          <div id= "allSet">
+            <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <p class="text-justify h1 title">Drag & Drop </p>
+            <p class="text-justify h1 title">to Upload File</p>
+            <p class="text-justify h1 title">OR</p>
+            <button>Browse File</button>
+            <input type="file" hidden>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="row">
       <div class="col d-flex justify-content-center">
-        <button class="glow-on-hover send" type="button">Extract Text</button>
+        <button class="glow-on-hover" id = "extractText" type="button">Extract Text</button>
       </div>
       <div class="col d-flex justify-content-center">
-        <button class="glow-on-hover send" type="button">download as .txt file</button>
+        <button class="glow-on-hover createTxt" id = "createTXT"type="button">download as .txt file</button>
+      </div>
+      <div class="col d-flex justify-content-center">
+        <button class="glow-on-hover createTxt" id = "clearImage"type="button">clear image</button>
       </div>
     </div>
 

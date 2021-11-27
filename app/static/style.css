@@ -35,7 +35,8 @@ body {
   font-size: 100px;
   color: #fff;
 }
-.drag-area header {
+
+.title {
   font-size: 30px;
   font-weight: 500;
   color: #fff;

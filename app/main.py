@@ -22,7 +22,7 @@ from fastapi.staticfiles import StaticFiles
 
 
 class Settings(BaseSettings):
-    debug:bool= False
+    DEBUG:bool= False
     name:str
     echo_active: bool = False
     class Config:
@@ -60,7 +60,7 @@ app.add_middleware(
 @app.get('/', response_class=HTMLResponse)
 def home_view(request: Request, settings:Settings = Depends(get_settings)):
     print(settings.name)
-    print(settings.debug)
+    print(settings.DEBUG)
     return templates.TemplateResponse('index.html', {"request":request})
 
 
@@ -75,6 +75,7 @@ async def prediction_view(file:UploadFile=File(...),settings:Settings = Depends(
         raise HTTPException(detail="invalid img", status_code=400)
 
     prediction_origin = pytesseract.image_to_string(img)
+
     prediction = [line for line in prediction_origin.split('\n') if line not in ['','\t','\f']]
     
     return {"results":prediction, "original_string":prediction_origin}
@@ -100,5 +101,27 @@ async def img_echo_view(file:UploadFile=File(...),settings:Settings = Depends(ge
     dest = UPLOAD_DIR/f'{uuid.uuid1()}{file_extention}'
     img.save(dest)
     return dest
+
+
+@app.post('/create-text/', response_class=FileResponse)
+async def create_text(file:UploadFile=File(...)):
+
+    bytes_str = io.BytesIO(file.file.read())
+
+    try:
+        img = Image.open(bytes_str) # converting bytes into a img if it could be all ok
+    except:
+        raise HTTPException(detail="invalid img", status_code=400)
+
+    prediction_origin = pytesseract.image_to_string(img)
+    #prediction = [line for line in prediction_origin.split('\n') if line not in ['','\t','\f']]
+
+    with open('my_new_file2.txt', 'w', encoding="utf-8") as f:
+        f.write(prediction_origin)
+    
+    return FileResponse('my_new_file2.txt', media_type='text/plain')
+        
+
+
 
 

@@ -439,6 +439,49 @@ prediction = [line for line in prediction.split('\n') if line not in ['','\t','\
 print(prediction)
 ```
 
+### Implementing on a end-point
+
+```python
+import pytesseract
+from PIL import Image
+import io
+
+@app.post('/')
+async def prediction_view(file:UploadFile=File(...),settings:Settings = Depends(get_settings)):
+
+    bytes_str = io.BytesIO(file.file.read())
+
+    try:
+        img = Image.open(bytes_str) # converting bytes into a img if it could be all ok
+    except:
+        raise HTTPException(detail="invalid img", status_code=400)
+
+    prediction_origin = pytesseract.image_to_string(img)
+
+    prediction = [line for line in prediction_origin.split('\n') if line not in ['','\t','\f']]
+
+    return {"results":prediction, "original_string":prediction_origin}
+
+```
+
+Process:
+
+1. We must cast file received to a Bytes.
+2. Open it as a image (`Image.open() `)
+3. using `pytesseract.image_to_string(img)` we extract the text
+4. the result is a string with `\n` in between
+5. split it and create a list of lines.
+
+## adding layer of security - authorization token header
+
+we must use a module called `secrets`
+
+```python
+import secrets
+
+secrets.token_urlsafe(32) # thats generate a token
+```
+
 ## Static files
 
 using jinja2 we can link a static file:
